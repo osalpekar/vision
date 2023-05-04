@@ -217,22 +217,6 @@ def indent(indentation, data_list):
     return ("\n" + " " * indentation).join(yaml.dump(data_list, default_flow_style=False).splitlines())
 
 
-def cmake_workflows(indentation=6):
-    jobs = []
-    python_version = "3.8"
-    for os_type in ["linux", "windows", "macos"]:
-        # Skip OSX CUDA
-        device_types = ["cpu", "gpu"] if os_type != "macos" else ["cpu"]
-        for device in device_types:
-            job = {"name": f"cmake_{os_type}_{device}", "python_version": python_version}
-
-            job["cu_version"] = "cu117" if device == "gpu" else "cpu"
-            if device == "gpu" and os_type == "linux":
-                job["wheel_docker_image"] = "pytorch/manylinux-cuda117"
-            jobs.append({f"cmake_{os_type}_{device}": job})
-    return indent(indentation, jobs)
-
-
 if __name__ == "__main__":
     d = os.path.dirname(__file__)
     env = jinja2.Environment(
@@ -246,6 +230,5 @@ if __name__ == "__main__":
         f.write(
             env.get_template("config.yml.in").render(
                 build_workflows=build_workflows,
-                cmake_workflows=cmake_workflows,
             )
         )
